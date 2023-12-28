@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLC Sync</title>
+    <style>
+      .range {
+        position: relative;
+        width: 90%;
+        height: 100px;
+      }
+      .play {
+        position: relative;
+        width: 200px;
+        height: 200px;
+      }
+    </style>
+    <!-- <link rel="icon" href="./favicon.ico" type="image/x-icon"> -->
+  </head>
+  <body>
+    <main>
+        <h1>Welcome to My Website. Duration: </h1>
+        <h1 class="disp-duration"></h1> 
+        <center>
+          <button type="button" onclick="set_duration()">Set duration</button>
+          <br><br>
+        </center>
+        <center>
+          <button class="play" type="button" onclick="play()">Play</button>
+        </center>
+        <br>
+        <center>
+          <input class="range" type="range" min="1" max="100" value="0" class="slider" id="myRange" onchange="time($('.range').val())">
+        </center>
+    </main>
+	   <script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+  <script>
+    let GLOBAL = {};
+
+    function set_global(name, val) {
+      GLOBAL[name] = val;
+      $.ajax({
+          url: "/set_global/"
+              + name.toString()
+              + "/" + val.toString()
+        });
+    }
+
+    function play() {
+      $.ajax({
+          url: "/set_global/play/"+(1-GLOBAL["play"]).toString()
+      });
+    }
+
+    function set_duration() {
+      let duration = parseInt(prompt("Duration in ms", ""));
+      set_global("duration", duration);
+    }
+
+    function time(t) {
+      set_global("time", t);
+    }
+
+    function update() {
+      $.ajax({
+          url: "/update/"
+      });
+      $.ajax({
+          url: "/get_globals/",
+          success: function(response) {
+            // console.log(response);
+            GLOBAL = JSON.parse(response);
+            $(".range").attr("max", GLOBAL["duration"]);
+            $(".disp-duration").text(
+              GLOBAL["time"].toString()
+              + "/" 
+              + GLOBAL["duration"].toString());
+            $(".range").val(GLOBAL["time"]);
+            if (GLOBAL["play"] == 1) {
+              $(".play").text("Pause");
+            }
+            else {
+              $(".play").text("Play");
+            }
+          }
+      });
+    }
+
+    $(document).ready(function() {
+        setInterval(function() {
+          update();
+        }, 500);
+    });
+
+
+
+  </script>
+  </body>
+</html>
