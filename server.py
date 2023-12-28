@@ -4,20 +4,20 @@ from time import time
 
 app = Flask(__name__)
 
-@app.route('/update/')
-def update():
+def global_update():
     t = int(time()*1000)
     dt = t - GLOBAL["last_upd"]
-
     if GLOBAL["play"] == 1:
         GLOBAL["time"] = max(1, min(
             GLOBAL["time"] + dt,
             GLOBAL["duration"] - 1000
         ))
-
-    print("upd", GLOBAL["time"])
-
     GLOBAL["last_upd"] = t
+
+@app.route('/update/')
+def update():
+    global_update()
+    print("upd", GLOBAL["time"])
     return "OK"
 
 @app.route('/')
@@ -46,6 +46,7 @@ def get_global(name):
 def get_globals():
     global GLOBAL
     try:
+        global_update()
         return str(GLOBAL).replace("'", '"')
     except:
         return "ERROR", 400
