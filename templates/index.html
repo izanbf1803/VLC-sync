@@ -56,9 +56,43 @@
       });
     }
 
+    function parseDuration(duration) {
+      let total = 0;
+      let running = 0;
+      duration.split('').forEach(c => {
+        if (c == 'h') {
+          total += running * 60 * 60;
+          running = 0;
+        }
+        else if (c == 'm') {
+          total += running * 60;
+          running = 0;
+        }
+        else if (c == 's') {
+          total += running;
+          running = 0;
+        }
+        else {
+          running *= 10;
+          running += parseInt(c);
+        }
+      });
+      total += running;
+      console.log(total);
+      return total;
+    }
+
     function set_duration() {
-      let duration = parseInt(prompt("Duration in ms", ""));
-      set_global("duration", duration);
+      let duration = prompt("Set duration", "").trim().replace(/\s/g, '');
+      console.log(duration);
+      if (duration.match(/^([\d]+[hH]?)?([\d]+[mM]?)?([\d]+[sS]?)?$/)) {
+        let s_duration = parseDuration(duration);
+        let ms_duration = s_duration * 1000;
+        set_global("duration", ms_duration);
+      }
+      else {
+        alert("Invalid duration!");
+      }
     }
 
     function time(t) {
